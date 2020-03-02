@@ -5,6 +5,7 @@ import FareNavigation from './components/FareNavigation/FareNavigation.js';
 import Schedule from './components/Schedule/Schedule.js';
 import Route from './components/Route/Route.js';
 import Time from './components/Time/Time.js';
+import Receipt from './components/Receipt/Receipt.js';
 
 import { differenceInMinutes } from 'date-fns'
 
@@ -19,8 +20,12 @@ class App extends Component {
     pickupLocation: "",
     dropoffLocation: "",
     minutes: 0, 
+    minutesCost: 0, 
     hours: 0, 
+    hoursCost: 0, 
     days: 0,
+    daysCost: 0,
+    totalCost: 0,
   }
 
   onNavClick = (newValue) => {
@@ -36,13 +41,20 @@ class App extends Component {
   }
 
   onDropoffDateChange = (newValue) => {
-    // calculate difference in minutes
+    // calculate difference in minutes, hours, and days
     let minDiff = differenceInMinutes(newValue, this.state.pickupDateSelected); 
+    let hours = Math.floor(minDiff / 60)
+    let minutes = minDiff - (hours * 60)
+    let days = Math.floor(hours / 24)
+    hours = hours - (days * 24)
 
     this.setState({
       dropoffDateSelected: newValue,
       minutesApart: minDiff,
-    })
+      minutes: minutes, 
+      hours: hours,
+      days: days,
+    }, this.calculateCosts)
   }
 
   onInputChange = event => {
@@ -52,43 +64,76 @@ class App extends Component {
   }
 
   onMinutesChange = event => {
-    const min = event.target.value; 
-    if (min >= 0 && min < 61) {
-      this.setState({
-        minutes: min,
-      })
+    let minutes = parseInt(event.target.value);
+    if (minutes === 60) {
+      minutes = 0;
+    } else if (minutes === -1) {
+      minutes = 59
     }
+    this.setState({minutes: minutes}, this.calculateCosts)
   }
 
   onHoursChange = event => {
-    const hr = event.target.value; 
-    if (hr >= 0 && hr < 25) {
-      this.setState({
-        hours: hr,
-      })
+    let hours = parseInt(event.target.value); 
+    if (hours === 24) {
+      hours = 0;
+    } else if (hours === -1) {
+      hours = 23;
     }
+    this.setState({hours: hours}, this.calculateCosts)
   }
 
   onDaysChange = event => {
     const d = event.target.value; 
     if (d >= 0) {
-      this.setState({
-        days: d,
-      })
+      this.setState({days: d}, this.calculateCosts)
     }
   }
 
   calculateCosts = () => {
-    if (this.state.minutesApart > 60) {
-      let hours = this.state.minutesApart / 60; 
-      console.log(hours);
-    } else {
+    let daysCost = this.state.days * 85;
+    
+    // determine total hours + minutes
+    const hrsMins = this.state.hours * 60 + this.state.minutes;
+    const minsCap = 15;
+    let hrsCap = 55;
 
+    // set minutesCost
+    let minutesCost = this.state.minutes * .40;
+    if (minutesCost > 15) {
+      minutesCost = 15;
     }
+
+    // set hoursCost
+    let hoursCost = this.state.hours * 15; 
+    if (hoursCost > 85) { 
+      hoursCost = 85;
+    }
+
+    // account for 8 hour pricing
+    if (hrsMins <= 60*8) {
+      if (hoursCost > 55) {
+        minutesCost = 0; 
+        hoursCost = 55; 
+      } else if ((hoursCost + minutesCost) > 55) {
+        minutesCost = 55 - hoursCost;
+      }
+    } else {
+      if (hoursCost === 85) {
+        minutesCost = 0;
+      }
+    }
+
+    this.setState({
+      minutesCost: minutesCost, 
+      hoursCost: hoursCost,
+      daysCost: daysCost,
+      totalCost: minutesCost + hoursCost + daysCost,
+    })
   }
 
+
   render() {
-    this.calculateCosts()
     return (  
       <div className="App">
         <div className="FareEstimator">
@@ -114,9 +159,7 @@ class App extends Component {
               />
             ) : (
               <Time
-                minutes={this.state.minutes}
-                hours={this.state.hours}
-                days={this.state.days}
+                {...this.state}
                 onChange={this.onInputChange}
                 onMinutesChange={this.onMinutesChange}
                 onHoursChange={this.onHoursChange}
@@ -124,6 +167,9 @@ class App extends Component {
               />
             )
           }
+          <Receipt 
+            {...this.state}
+          />
         </div>
       </div>
     );
