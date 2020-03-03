@@ -2,31 +2,50 @@ import React, { Component } from 'react';
 import './Route.css'
 
 import TextField from '@material-ui/core/TextField';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import Typography from '@material-ui/core/Typography';
 
 class Route extends Component {
     render() {
-    const {pickupLocation, dropoffLocation, onChange} = this.props;
+    const {pickupLocation, dropoffLocation, onChange, pickupOptions, dropoffOptions} = this.props;
     return (
         <div className="Route">
           <form noValidate autoComplete="off">
-            <TextField 
+            <Autocomplete 
               id="pickup-location" 
-              label="Pickup" 
-              variant="outlined" 
-              name="pickupLocation"
-              fullWidth
-              value={pickupLocation} 
-              onChange={onChange}
+              classes={{option: "Route-options"}}
+              options={pickupOptions.map(location => location.name)}
+              freeSolo
+              renderInput={params => 
+                <TextField 
+                  {...params} 
+                  label="Pickup" 
+                  variant="outlined" 
+                  // InputProps={{ ...params.InputProps, type: 'search' }}
+                  onChange={onChange} 
+                  value={pickupLocation} 
+                  name="pickup" 
+                />
+              }
+              renderOption={option => <Typography noWrap>{option}</Typography>}
             />
-            <TextField 
+            <Autocomplete 
               id="dropoff-location" 
-              label="Dropoff" 
-              variant="outlined" 
-              name="dropoffLocation"
-              fullWidth 
+              classes={{option: "Route-options"}}
               style={{ marginTop: "1rem"}} 
-              value={dropoffLocation}
-              onChange={onChange}
+              options={dropoffOptions.map(location => location.name)}
+              freeSolo
+              renderInput={params => 
+                <TextField 
+                  {...params} 
+                  label="Dropoff" 
+                  variant="outlined" 
+                  // InputProps={{ ...params.InputProps, type: 'search' }} 
+                  onChange={onChange} value={dropoffLocation} 
+                  name="dropoff" 
+                />
+              }
+              renderOption={option => <Typography noWrap>{option}</Typography>}
             />
           </form>
         </div>

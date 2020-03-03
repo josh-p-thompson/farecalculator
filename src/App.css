@@ -1,17 +1,3 @@
-/* layout if adding map */
-/* .App {
-  display: grid;
-  grid-template-columns: 10rem auto 2fr 10rem;
-  grid-template-rows: 1fr 2fr 1fr; 
-  height: 100vh;
-} */
-/* .FareEstimator {
-  grid-column: 2;
-  grid-row: 2;
-  width: 20rem;
-} */
-
-/* layout for solo calculator */
 .App {
   display: flex;
   justify-content: center;

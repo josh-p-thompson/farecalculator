@@ -14,16 +14,26 @@ const today = new Date();
 class App extends Component {
   state = {
     navSelected: 0, 
+    minutesApart: 0,
     pickupDateSelected: today, 
     dropoffDateSelected: today, 
-    minutesApart: 0,
     pickupLocation: "",
+    pickup: {
+      "input": "",
+      "lngLat": [], 
+      "options": [],
+    },
     dropoffLocation: "",
+    dropoff: {
+      "input": "",
+      "lngLat": [], 
+      "options": [],
+    },
     minutes: 0, 
-    minutesCost: 0, 
     hours: 0, 
-    hoursCost: 0, 
     days: 0,
+    minutesCost: 0, 
+    hoursCost: 0, 
     daysCost: 0,
     totalCost: 0,
   }
@@ -60,6 +70,41 @@ class App extends Component {
   onInputChange = event => {
     this.setState({
       [event.target.name]: event.target.value
+    })
+  }
+    
+  onLocationChange = event => {
+    const newInput = this.state[event.target.name]; 
+    newInput["input"] = event.target.value;
+    this.setState({
+      [event.target.name]: newInput
+    })
+    
+    // call geocoding api if input string is >3 characters
+    if (event.target.value.length > 4) {
+      this.geocode(event);
+    }
+  }
+
+  geocode = (event) => {
+    const inputName = event.target.name;
+    const newInput = this.state[inputName];
+    const url = 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + event.target.value + ".json?autocomplete=true&country=us&language=en&proximity=-122.268560,37.873710";
+    fetch(url, {
+      method: 'GET',
+      headers: {'Content-Type': 'application/json'},
+    })
+    .then(response => response.json())
+    .then(data => {
+      // get location options
+      let options = []; 
+      data.features.map(feature => {
+        options.push({"name": feature.place_name, "lngLat": feature.geometry.coordinates})
+      })
+      
+      // set state
+      newInput["options"] = options;
+      this.setState({[inputName]: newInput})
     })
   }
 
@@ -110,8 +155,10 @@ class App extends Component {
       hoursCost = 85;
     }
 
-    // account for 8 hour pricing
-    if (hrsMins <= 60*8) {
+    // account for various caps
+    if (hrsMins > 0 && hrsMins < 6.25) {
+      minutesCost = 2.50;
+    } else if (hrsMins <= 60*8) {
       if (hoursCost > 55) {
         minutesCost = 0; 
         hoursCost = 55; 
@@ -141,14 +188,16 @@ class App extends Component {
             <FareNavigation 
               navSelected={this.state.navSelected}
               onNavClick={this.onNavClick}
-            />
+              />
           </div>
           {
             (this.state.navSelected === 0) ? (
               <Route 
                 pickupLocation={this.state.pickupLocation}
                 dropoffLocation={this.state.dropoffLocation}
-                onChange={this.onInputChange}
+                onChange={this.onLocationChange}
+                pickupOptions={this.state.pickup.options}
+                dropoffOptions={this.state.dropoff.options}
               />
             ) : (this.state.navSelected === 1) ? (
               <Schedule
