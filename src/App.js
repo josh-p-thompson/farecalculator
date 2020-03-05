@@ -17,30 +17,57 @@ class App extends Component {
     minutesApart: 0,
     pickupDateSelected: today, 
     dropoffDateSelected: today, 
-    pickupLocation: "",
     pickup: {
       "input": "",
       "lngLat": [], 
       "options": [],
     },
-    dropoffLocation: "",
     dropoff: {
       "input": "",
       "lngLat": [], 
       "options": [],
     },
-    minutes: 0, 
-    hours: 0, 
-    days: 0,
-    minutesCost: 0, 
-    hoursCost: 0, 
-    daysCost: 0,
-    totalCost: 0,
+    minutes: '', 
+    hours: '', 
+    days: '',
+    costs: {
+      "minutesCost": 0, 
+      "hoursCost": 0, 
+      "daysCost": 0,
+      "totalCost": 0,
+    },
   }
 
   onNavClick = (newValue) => {
     this.setState({
       navSelected: newValue,
+    }, this.resetState)
+  }
+
+  resetState = () => {
+    this.setState({
+      minutesApart: 0,
+      pickupDateSelected: today, 
+      dropoffDateSelected: today, 
+      pickup: {
+        "input": "",
+        "lngLat": [], 
+        "options": [],
+      },
+      dropoff: {
+        "input": "",
+        "lngLat": [], 
+        "options": [],
+      },
+      minutes: '', 
+      hours: '', 
+      days: '',
+      costs: {
+        "minutesCost": 0, 
+        "hoursCost": 0, 
+        "daysCost": 0,
+        "totalCost": 0,
+      },
     })
   }
 
@@ -50,16 +77,23 @@ class App extends Component {
     })
   }
 
+  // set state then calculate time
   onDropoffDateChange = (newValue) => {
+    const minDiff = differenceInMinutes(newValue, this.state.pickupDateSelected);
+
+    this.setState({
+      dropoffDateSelected: newValue
+    }, this.calculateTime(minDiff))
+  }
+
+  calculateTime = (minDiff) => {
     // calculate difference in minutes, hours, and days
-    let minDiff = differenceInMinutes(newValue, this.state.pickupDateSelected); 
     let hours = Math.floor(minDiff / 60)
     let minutes = minDiff - (hours * 60)
     let days = Math.floor(hours / 24)
     hours = hours - (days * 24)
 
     this.setState({
-      dropoffDateSelected: newValue,
       minutesApart: minDiff,
       minutes: minutes, 
       hours: hours,
@@ -72,67 +106,81 @@ class App extends Component {
       [event.target.name]: event.target.value
     })
   }
-    
-  onLocationChange = event => {
-    const newInput = this.state[event.target.name]; 
-    newInput["input"] = event.target.value;
-    this.setState({
-      [event.target.name]: newInput
-    })
-    
-    // call geocoding api if input string is >3 characters
-    if (event.target.value.length > 4) {
-      this.geocode(event);
-    }
-  }
-
-  geocode = (event) => {
-    const inputName = event.target.name;
-    const newInput = this.state[inputName];
-    const url = 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + event.target.value + ".json?autocomplete=true&country=us&language=en&proximity=-122.268560,37.873710";
-    fetch(url, {
-      method: 'GET',
-      headers: {'Content-Type': 'application/json'},
-    })
-    .then(response => response.json())
-    .then(data => {
-      // get location options
-      let options = []; 
-      data.features.map(feature => {
-        options.push({"name": feature.place_name, "lngLat": feature.geometry.coordinates})
+  
+  onRouteChange = (event, value) => {
+    // limit to valid event
+    if (event.target.id === "pickup" || event.target.id === "dropoff") {
+      const label = event.target.id;
+      const newInput = this.state[label]; 
+      newInput["input"] = value;
+      this.setState({
+        [label]: newInput
       })
       
-      // set state
-      newInput["options"] = options;
-      this.setState({[inputName]: newInput})
-    })
+      // call geocoding api if input string is >3 characters
+      if (value.length > 4) {
+        this.geocode(label, value);
+      }
+    }
   }
 
-  onMinutesChange = event => {
-    let minutes = parseInt(event.target.value);
-    if (minutes === 60) {
-      minutes = 0;
-    } else if (minutes === -1) {
-      minutes = 59
+  onSelectPickup = (event, value) => {
+    if (value) {
+      let pickup = this.state.pickup;
+      pickup["input"] = value.name; 
+      pickup["lngLat"] = value.lngLat; 
+      this.setState({pickup: pickup}, this.directions);
+    } else {
+      let pickup = this.state.pickup;
+      pickup["input"] = ""; 
+      pickup["lngLat"] = ""; 
+      this.setState({pickup: pickup});
     }
-    this.setState({minutes: minutes}, this.calculateCosts)
   }
 
-  onHoursChange = event => {
-    let hours = parseInt(event.target.value); 
-    if (hours === 24) {
-      hours = 0;
-    } else if (hours === -1) {
-      hours = 23;
+  onSelectDropoff = (event, value) => {
+    if (value) {
+      let dropoff = this.state.dropoff;
+      dropoff["input"] = value.name; 
+      dropoff["lngLat"] = value.lngLat; 
+      this.setState({dropoff: dropoff}, this.directions);
+    } else {
+      let dropoff = this.state.dropoff;
+      dropoff["input"] = ""; 
+      dropoff["lngLat"] = ""; 
+      this.setState({dropoff: dropoff});
     }
-    this.setState({hours: hours}, this.calculateCosts)
   }
 
-  onDaysChange = event => {
-    const d = event.target.value; 
-    if (d >= 0) {
-      this.setState({days: d}, this.calculateCosts)
+  onTimeChange = event => {
+    let minutes = this.state.minutes; 
+    let hours = this.state.hours; 
+    let days = this.state.days;
+
+    if (event.target.id === "minutes") {
+      minutes = parseInt(event.target.value);
+      if (minutes === 60) {
+        minutes = 0;
+      } else if (minutes === -1) {
+        minutes = 59
+      }
+
+    } else if (event.target.id === "hours") {
+      hours = parseInt(event.target.value); 
+      if (hours === 24) {
+        hours = 0;
+      } else if (hours === -1) {
+        hours = 23;
+      }
+
+    } else if (event.target.id === "days") {
+      if (event.target.value >= 0) {
+        days = event.target.value;
+      }
     }
+    
+    // set state and calculate costs
+    this.setState({minutes: minutes, hours: hours, days: days}, this.calculateCosts);
   }
 
   calculateCosts = () => {
@@ -170,57 +218,97 @@ class App extends Component {
         minutesCost = 0;
       }
     }
-
-    this.setState({
+    const costs = {
       minutesCost: minutesCost, 
       hoursCost: hoursCost,
       daysCost: daysCost,
       totalCost: minutesCost + hoursCost + daysCost,
+    }
+    this.setState({costs: costs})
+  }
+
+
+// fetch data from mapbox
+  geocode = (name, value) => {
+    const inputName = name;
+    const newInput = this.state[inputName];
+    const url = 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + value + ".json?autocomplete=true&country=us&language=en&proximity=-122.268560,37.873710&access_token=" + MAPBOX_TOKEN;
+    fetch(url, {
+      method: 'GET',
+      headers: {'Content-Type': 'application/json'},
+    })
+    .then(response => response.json())
+    .then(data => {
+      // get location options
+      let options = []; 
+      data.features.map((feature, index) => {
+        options.push({"name": feature.place_name, "lngLat": feature.geometry.coordinates, "index": index})
+      })
+      
+      // set state
+      newInput["options"] = options;
+      this.setState({[inputName]: newInput})
     })
   }
+
+  directions = () => {
+    if (this.state.pickup.lngLat.length > 0 && this.state.dropoff.lngLat.length > 0) {
+      const pickupLngLat = this.state.pickup.lngLat.join();
+      const dropoffLngLat = this.state.dropoff.lngLat.join();
+      const url = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/" + pickupLngLat + ";" + dropoffLngLat + "?access_token=" + MAPBOX_TOKEN; 
+      fetch(url, {
+        method: 'GET',
+        headers: {'Content-Type': 'application/json'},
+      })
+      .then(response => response.json())
+      .then(data => {
+        let minutesApart = Math.round(data.routes[0].duration / 60);
+        this.setState({minutesApart: minutesApart}, this.calculateTime(minutesApart));
+      })
+    }
+  }
+
 
 
   render() {
     return (  
-      <div className="App">
-        <div className="FareEstimator">
-          <div className="FareEstimator-navigation">
-            <FareNavigation 
-              navSelected={this.state.navSelected}
-              onNavClick={this.onNavClick}
-              />
-          </div>
-          {
-            (this.state.navSelected === 0) ? (
-              <Route 
-                pickupLocation={this.state.pickupLocation}
-                dropoffLocation={this.state.dropoffLocation}
-                onChange={this.onLocationChange}
-                pickupOptions={this.state.pickup.options}
-                dropoffOptions={this.state.dropoff.options}
-              />
-            ) : (this.state.navSelected === 1) ? (
-              <Schedule
-                onPickupDateChange={this.onPickupDateChange}
-                pickupDateSelected={this.state.pickupDateSelected}
-                dropoffDateSelected={this.state.dropoffDateSelected}
-                onDropoffDateChange={this.onDropoffDateChange}
-              />
-            ) : (
-              <Time
-                {...this.state}
-                onChange={this.onInputChange}
-                onMinutesChange={this.onMinutesChange}
-                onHoursChange={this.onHoursChange}
-                onDaysChange={this.onDaysChange}
-              />
-            )
-          }
-          <Receipt 
-            {...this.state}
-          />
+    <div className="App">
+      <div className="FareEstimator">
+        <div className="FareEstimator-navigation">
+          <FareNavigation 
+            navSelected={this.state.navSelected}
+            onNavClick={this.onNavClick}
+            />
         </div>
+        {
+          (this.state.navSelected === 0) ? (
+            <Route 
+              onInputChange = {this.onRouteChange}
+              pickupOptions={this.state.pickup.options}
+              dropoffOptions={this.state.dropoff.options}
+              onClose={this.updateLngLat}
+              onPickupChange={this.onSelectPickup}
+              onDropoffChange={this.onSelectDropoff}
+            />
+          ) : (this.state.navSelected === 1) ? (
+            <Schedule
+              onPickupDateChange={this.onPickupDateChange}
+              pickupDateSelected={this.state.pickupDateSelected}
+              dropoffDateSelected={this.state.dropoffDateSelected}
+              onDropoffDateChange={this.onDropoffDateChange}
+            />
+          ) : (
+            <Time
+              {...this.state}
+              onChange={this.onTimeChange}
+            />
+          )
+        }
+        <Receipt 
+          {...this.state}
+        />
       </div>
+    </div>
     );
   }
 }

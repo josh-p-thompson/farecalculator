@@ -7,45 +7,44 @@ import Typography from '@material-ui/core/Typography';
 
 class Route extends Component {
     render() {
-    const {pickupLocation, dropoffLocation, onChange, pickupOptions, dropoffOptions} = this.props;
+    const {onInputChange, onPickupChange, onDropoffChange, pickupOptions, dropoffOptions, onClose} = this.props;
     return (
         <div className="Route">
           <form noValidate autoComplete="off">
             <Autocomplete 
-              id="pickup-location" 
+              id="pickup" 
               classes={{option: "Route-options"}}
-              options={pickupOptions.map(location => location.name)}
-              freeSolo
+              options={pickupOptions}
+              getOptionLabel={option => option.name}
+              autoComplete
+              onInputChange={onInputChange}
+              onChange={onPickupChange}
               renderInput={params => 
                 <TextField 
                   {...params} 
                   label="Pickup" 
                   variant="outlined" 
-                  // InputProps={{ ...params.InputProps, type: 'search' }}
-                  onChange={onChange} 
-                  value={pickupLocation} 
-                  name="pickup" 
                 />
               }
-              renderOption={option => <Typography noWrap>{option}</Typography>}
+              renderOption={option => <Typography id="pickup" noWrap>{option.name}</Typography>}
             />
             <Autocomplete 
-              id="dropoff-location" 
+              id="dropoff" 
               classes={{option: "Route-options"}}
               style={{ marginTop: "1rem"}} 
-              options={dropoffOptions.map(location => location.name)}
-              freeSolo
+              options={dropoffOptions}
+              getOptionLabel={option => option.name}
+              autoComplete
+              onInputChange={onInputChange}
+              onChange={onDropoffChange}
               renderInput={params => 
                 <TextField 
                   {...params} 
                   label="Dropoff" 
                   variant="outlined" 
-                  // InputProps={{ ...params.InputProps, type: 'search' }} 
-                  onChange={onChange} value={dropoffLocation} 
-                  name="dropoff" 
                 />
               }
-              renderOption={option => <Typography noWrap>{option}</Typography>}
+              renderOption={option => <Typography id="dropoff" noWrap>{option.name}</Typography>}
             />
           </form>
         </div>

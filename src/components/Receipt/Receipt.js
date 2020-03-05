@@ -1,31 +1,26 @@
-import React, { Component } from 'react';
+import React from 'react';
 import './Receipt.css'
-
-import Typography from '@material-ui/core/Typography';
-import Divider from '@material-ui/core/Divider';
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 
-class Receipt extends Component {
-    render() {
-    const {minutesCost, minutes, hoursCost, hours, daysCost, days, totalCost} = this.props;
+function Receipt (props) {
+    const {minutes, hours, days, costs} = props;
     const data = {}
     if (minutes > 0) {
-        data["Minute"] = {"time": minutes, "cost": minutesCost}
+        data["Minute"] = {"time": minutes, "cost": costs.minutesCost}
     }
     if (hours > 0) {
-        data["Hour"] = {"time": hours, "cost": hoursCost}
+        data["Hour"] = {"time": hours, "cost": costs.hoursCost}
     }
     if (days > 0) {
-        data["Day"] = {"time": days, "cost": daysCost,}
+        data["Day"] = {"time": days, "cost": costs.daysCost}
     }
 
-    if (totalCost > 0) {
+    if (costs.totalCost > 0) {
         return (
         <div className="Receipt">
             <TableContainer>
@@ -43,7 +38,7 @@ class Receipt extends Component {
                         <TableRow>
                             <TableCell style={{borderBottom:'0', fontWeight: "bold"}} >Total</TableCell>
                             <TableCell align="left" style={{borderBottom:'0'}} > </TableCell>
-                            <TableCell align="right" style={{borderBottom:'0', fontWeight: "bold"}} >${totalCost.toFixed(2)}</TableCell>
+                            <TableCell align="right" style={{borderBottom:'0', fontWeight: "bold"}} >${costs.totalCost.toFixed(2)}</TableCell>
                         </TableRow>
                     </TableBody>
                 </Table>
@@ -51,10 +46,7 @@ class Receipt extends Component {
         </div>
         )
     } else {
-        return (
-            <empty></empty>
-        )
-    }
+        return (<empty></empty>)
     }
 }
 
