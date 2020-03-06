@@ -10,13 +10,14 @@ import Receipt from './components/Receipt/Receipt.js';
 import { differenceInMinutes } from 'date-fns'
 
 const today = new Date();
+const MAPBOX_TOKEN = "pk.eyJ1Ijoiam9zaHVhLXAtdGhvbXBzb24iLCJhIjoiY2s3YTZ0N3R2MDFtODNkbjVuczd2MDNjdiJ9.RMPF7fHxmQbsHe5kYb2d5A"
 
 class App extends Component {
   state = {
     navSelected: 0, 
     minutesApart: 0,
-    pickupDateSelected: today, 
-    dropoffDateSelected: today, 
+    pickupDateSelected: null, 
+    dropoffDateSelected: null, 
     pickup: {
       "input": "",
       "lngLat": [], 
@@ -47,8 +48,8 @@ class App extends Component {
   resetState = () => {
     this.setState({
       minutesApart: 0,
-      pickupDateSelected: today, 
-      dropoffDateSelected: today, 
+      pickupDateSelected: null, 
+      dropoffDateSelected: null, 
       pickup: {
         "input": "",
         "lngLat": [], 
@@ -159,23 +160,31 @@ class App extends Component {
 
     if (event.target.id === "minutes") {
       minutes = parseInt(event.target.value);
-      if (minutes === 60) {
+      // prevent minutes going beyond 0-59
+      if (minutes > 58) {
+        minutes = 59;
+      } else if (minutes < 1) {
         minutes = 0;
-      } else if (minutes === -1) {
-        minutes = 59
+      } else if (isNaN(minutes)) {
+        minutes = "";
       }
 
     } else if (event.target.id === "hours") {
       hours = parseInt(event.target.value); 
-      if (hours === 24) {
-        hours = 0;
-      } else if (hours === -1) {
+      // prevent hours going beyond 0-23
+      if (hours > 22) {
         hours = 23;
+      } else if (hours < 1) {
+        hours = 0;
+      } else if (isNaN(hours)) {
+        hours = ""; 
       }
 
     } else if (event.target.id === "days") {
       if (event.target.value >= 0) {
         days = event.target.value;
+      } else if (isNaN(event.target.value)) {
+        days = "";
       }
     }
     
@@ -227,8 +236,6 @@ class App extends Component {
     this.setState({costs: costs})
   }
 
-
-// fetch data from mapbox
   geocode = (name, value) => {
     const inputName = name;
     const newInput = this.state[inputName];
