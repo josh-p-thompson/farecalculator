@@ -46,12 +46,12 @@ Update ```MAPBOX_TOKEN``` in [App.js](src/App.js) with your own public Mapbox to
 
 ## Components Overview
 
-* FareNavigation - The navigation bar at the top of the app; see Material-UI's [Bottom Navigation](https://material-ui.com/components/bottom-navigation/)
-* Route - The two input boxes that query the Mapbox Geocoding API and show results as a dropdown; see Material-UI's [Autocomplete](https://material-ui.com/components/autocomplete/)
-* Schedule - 
-* DatePicker - 
-* Time - 
-* Receipt - 
+* FareNavigation - The navigation bar at the top of the app; see Material-UI's [Bottom Navigation](https://material-ui.com/components/bottom-navigation/).
+* Route - The two input boxes that query the Mapbox Geocoding API and show results as a dropdown; see Material-UI's [Autocomplete](https://material-ui.com/components/autocomplete/).
+* Schedule - Houses both DatePicker components.
+* DatePicker - Inputs for DateTime that open calendar selectors; see [Material-UI Pickers](https://material-ui-pickers.dev/).
+* Time - Inputs for minutes, hours, days; see Material-UI's [Text Field](https://material-ui.com/components/text-fields/).
+* Receipt - Visualizes price as a table; see Material-UI's [Table](https://material-ui.com/components/tables/).
 
 ## Tests
 
