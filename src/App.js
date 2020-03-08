@@ -78,7 +78,6 @@ class App extends Component {
     })
   }
 
-  // set state then calculate time
   onDropoffDateChange = (newValue) => {
     const minDiff = differenceInMinutes(newValue, this.state.pickupDateSelected);
 
@@ -197,8 +196,6 @@ class App extends Component {
     
     // determine total hours + minutes
     const hrsMins = this.state.hours * 60 + this.state.minutes;
-    const minsCap = 15;
-    let hrsCap = 55;
 
     // set minutesCost
     let minutesCost = this.state.minutes * .40;
@@ -213,8 +210,10 @@ class App extends Component {
     }
 
     // account for various caps
+    // minimum of 2.50 per trip
     if (hrsMins > 0 && hrsMins < 6.25) {
       minutesCost = 2.50;
+    // caps at 55 for 8 hours or less
     } else if (hrsMins <= 60*8) {
       if (hoursCost > 55) {
         minutesCost = 0; 
@@ -222,6 +221,7 @@ class App extends Component {
       } else if ((hoursCost + minutesCost) > 55) {
         minutesCost = 55 - hoursCost;
       }
+    // caps at 85 for the day
     } else {
       if (hoursCost === 85) {
         minutesCost = 0;
@@ -236,6 +236,7 @@ class App extends Component {
     this.setState({costs: costs})
   }
 
+  // geocodes addresses using Mapbox API
   geocode = (name, value) => {
     const inputName = name;
     const newInput = this.state[inputName];
@@ -258,6 +259,7 @@ class App extends Component {
     })
   }
 
+  // gets driving time from Mapbox API
   directions = () => {
     if (this.state.pickup.lngLat.length > 0 && this.state.dropoff.lngLat.length > 0) {
       const pickupLngLat = this.state.pickup.lngLat.join();
