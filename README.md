@@ -24,7 +24,7 @@ User can input pickup and dropoff datetimes.
 
 User can input minutes, hours, and days.
 
-Note how the estimate correctly accounts for the, $15 / hr, $55 / 8 hour and $85 / day pricing caps. 
+Note how the estimate correctly accounts for the $15 per hour, $55 per 8 hours, and $85 per day pricing caps. 
 
 ![](static/time.gif)
 
@@ -36,6 +36,25 @@ Note how the estimate correctly accounts for the, $15 / hr, $55 / 8 hour and $85
 * [Material-UI Pickers](https://material-ui-pickers.dev/)
 * [Mapbox](https://www.mapbox.com/)
 
+## Getting Started
+
+From the root directory, ```npm install``` to install all dependencies. 
+
+Update ```MAPBOX_TOKEN``` in [App.js](src/App.js) with your own public Mapbox token.
+
+```npm run start``` will get the local server running.
+
+## Components Overview
+
+* FareNavigation - The navigation bar at the top of the app; see Material-UI's [Bottom Navigation](https://material-ui.com/components/bottom-navigation/)
+* Route - The two input boxes that query the Mapbox Geocoding API and show results as a dropdown; see Material-UI's [Autocomplete](https://material-ui.com/components/autocomplete/)
+* Schedule - 
+* DatePicker - 
+* Time - 
+* Receipt - 
+
+## Tests
+
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License.
