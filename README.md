@@ -55,10 +55,3 @@ Update ```MAPBOX_TOKEN``` in [App.js](src/App.js) with your own public Mapbox to
 
 ## Tests
 
-## Core Logic & Things To Note
-
-## Features To Add
-
-## License
-
-This project is licensed under the MIT License.
