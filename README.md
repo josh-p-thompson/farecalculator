@@ -53,5 +53,3 @@ Update ```MAPBOX_TOKEN``` in [App.js](src/App.js) with your own public Mapbox to
 * ```Time``` - Inputs for minutes, hours, days; see Material-UI's [Text Field](https://material-ui.com/components/text-fields/).
 * ```Receipt``` - Visualizes price as a table; see Material-UI's [Table](https://material-ui.com/components/tables/).
 
-## Tests
-
