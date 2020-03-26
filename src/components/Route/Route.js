@@ -19,6 +19,7 @@ class Route extends Component {
               autoComplete
               onInputChange={onInputChange}
               onChange={onPickupChange}
+              noOptionsText="Input Valid Address"
               renderInput={params => 
                 <TextField 
                   {...params} 
@@ -37,6 +38,7 @@ class Route extends Component {
               autoComplete
               onInputChange={onInputChange}
               onChange={onDropoffChange}
+              noOptionsText="Input Valid Address"
               renderInput={params => 
                 <TextField 
                   {...params} 

@@ -117,8 +117,8 @@ class App extends Component {
         [label]: newInput
       })
       
-      // call geocoding api if input string is >3 characters
-      if (value.length > 4) {
+      // call geocoding api if input string is >0 characters
+      if (value.length > 0) {
         this.geocode(label, value);
       }
     }
